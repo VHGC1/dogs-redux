@@ -1,25 +1,31 @@
-import React, { useContext } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import useForm from "../../Hooks/useForm";
-import { UserContext } from "../../UserContext";
 import Button from "../Forms/Button";
 import Input from "../Forms/Input";
 import Error from "../Helper/Error";
 import styles from "./LoginForm.module.css";
-import stylesBtn from "../Forms/Button.module.css"
-import Head from "../Helper/Head"
+import stylesBtn from "../Forms/Button.module.css";
+import Head from "../Helper/Head";
+import { useSelector, useDispatch } from "react-redux";
+import { userLogin } from "../../store/user";
 
 const LoginForm = () => {
+  const dispatch = useDispatch();
   const username = useForm();
   const password = useForm();
 
-  const { userLogin, error, loading } = useContext(UserContext);
+  const { token, user } = useSelector((state) => state);
+  const loading = token.loading || user.loading;
+  const error = token.error || user.error;
 
   async function handleSubmit(event) {
     event.preventDefault();
 
     if (username.validate() && password.validate()) {
-      userLogin(username.value, password.value);
+      dispatch(
+        userLogin({ username: username.value, password: password.value })
+      );
     }
   }
 
@@ -31,7 +37,7 @@ const LoginForm = () => {
         <Input label="Usuário" type="text" name="username" {...username} />
         <Input label="Senha" type="password" name="password" {...password} />
         {loading ? <Button disabled>Entrar</Button> : <Button>Entrar</Button>}
-        <Error error={error && 'Dados incorretos.'} />
+        <Error error={error && "Dados incorretos."} />
       </form>
       <Link className={styles.perdeu} to="/login/perdeu">
         Perdeu a Senha?
